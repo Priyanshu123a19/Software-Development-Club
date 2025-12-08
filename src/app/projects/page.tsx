@@ -29,7 +29,7 @@ const CATEGORY_ACCENT: Record<Required<Project>["category"], { from: string; to:
 type Project = {
   title: string;
   description: string;
-  image: any;
+  image: StaticImageData;
   developer: string;
   devRole: string;
   developerAvatar: StaticImageData;

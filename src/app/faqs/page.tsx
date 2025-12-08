@@ -6,11 +6,12 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import Tag from "@/components/Tag";
 import design1 from "@/assets/images/design-example-1.png";
 import design2 from "@/assets/images/design-example-2.png";
+import { StaticImageData } from "next/image";
 
 type Event = {
   key: string;
   label: string;
-  images: any[];
+  images: StaticImageData[];
 };
 
 const EVENTS: Event[] = [
