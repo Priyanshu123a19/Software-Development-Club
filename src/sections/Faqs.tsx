@@ -35,12 +35,18 @@ export default function Faqs() {
             <Tag>Faqs</Tag>
             </div>
             <h2 className="text-6xl font-medium mt-6 text-center max-w-xl mx-auto">
-                Questions? we've got <span className="text-pink-400">answers</span>
+                Questions? we&apos;ve got <span className="text-pink-400">answers</span>
             </h2>
             <div className="mt-12 flex flex-col gap-6 max-w-xl mx-auto">
                 {faqs.map((faq, faqIndex) => (
                     <div key={faq.question} className="bg-neutral-900 rounded-2xl border border-white/10 p-6">
-                        <div className="flex justify-between items-center" onClick={()=> {setSelectedIndex(faqIndex)}}>
+                        <div className="flex justify-between items-center" 
+                        onClick={()=> {
+                            if (selectedIndex === faqIndex) {
+                                setSelectedIndex(0);
+                                faqIndex = 0;
+                            }
+                            setSelectedIndex(faqIndex)}}>
                         <h3 className="font-medium">{faq.question}</h3>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className={twMerge("feather feather-plus text-pink-400 flex-shrink-0 transition duration-300", selectedIndex === faqIndex && "rotate-45")}>
                             <line x1="12" y1="5" x2="12" y2="19"></line>

@@ -169,7 +169,7 @@ export default function FaqsPage() {
           <div className="mt-16">
             <div className="mb-6 text-center">
               <Tag className="mx-auto">Ask a question</Tag>
-              <h3 className="mt-3 text-3xl font-semibold md:text-4xl">We'd love to help</h3>
+              <h3 className="mt-3 text-3xl font-semibold md:text-4xl">We&apos;d love to help</h3>
             </div>
             <form className="mx-auto grid max-w-2xl gap-4">
               <div className="grid gap-4 md:grid-cols-2">
