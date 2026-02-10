@@ -28,7 +28,7 @@ import mridul from "@/assets/images/PR and Outreach Team/mridul.jpg";
 
 // Social Media and Content Team
 import unnati from "@/assets/images/Social Media and Content Team/Unnati.jpg";
-import vaibhavi from "@/assets/images/Social Media and Content Team/vaibhavi.JPG";
+import vaibhavi from "@/assets/images/Social Media and Content Team/vaibhavi.jpg";
 
 // Design and Videography Team
 import sakshiSharma from "@/assets/images/Design and Videography Team/Sakshi Sharma.jpg";
