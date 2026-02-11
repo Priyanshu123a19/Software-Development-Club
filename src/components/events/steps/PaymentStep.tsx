@@ -266,7 +266,7 @@ export default function PaymentStep({
                   </div>
                   <div>
                     <p className="text-white/50 text-xs mb-1">Account Number</p>
-                    <p className="text-white font-mono text-sm">656552XXXX</p>
+                    <p className="text-white font-mono text-sm">6661092952</p>
                   </div>
                   <div>
                     <p className="text-white/50 text-xs mb-1">IFSC Code</p>
@@ -274,7 +274,7 @@ export default function PaymentStep({
                   </div>
                   <div>
                     <p className="text-white/50 text-xs mb-1">Account Name</p>
-                    <p className="text-white text-sm">SDC</p>
+                    <p className="text-white text-sm">SOFTWARE DEVELOPMENT CLUB</p>
                   </div>
                 </div>
               </div>
