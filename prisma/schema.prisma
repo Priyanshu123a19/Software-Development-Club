@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Event {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  date         DateTime
+  venue        String
+  capacity     Int
+  price        Float
+  image        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  passes        Pass[]
+  registrations Registration[]
+  
+  @@index([date])
+}
+
+model Pass {
+  id       String   @id @default(cuid())
+  type     String   // e.g., "solo", "couple"
+  price    Float
+  benefits String[] // e.g., ["Event Access", "Meals", "Swag Kit"]
+  
+  eventId  String
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@index([eventId])
+}
+
+model Registration {
+  id            String        @id @default(cuid())
+  
+  // Primary contact information (Member 1 for Couple passes)
+  firstName     String
+  middleName    String?
+  lastName      String
+  regNo         String        @unique
+  email         String
+  mobile        String
+  
+  // Event Information
+  event         Event?        @relation(fields: [eventId], references: [id])
+  eventId       String?
+  passType      String
+  
+  // Participants (for Couple passes, stores both members)
+  participants  Participant[]
+  
+  // Payment Information
+  paymentStatus PaymentStatus @default(PENDING)
+  transactionId String?
+  screenshotUrl String?
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@index([regNo])
+  @@index([eventId])
+  @@index([paymentStatus])
+}
+
+model Participant {
+  id              String   @id @default(cuid())
+  
+  // Participant information
+  firstName       String
+  middleName      String?
+  lastName        String
+  regNo           String
+  email           String
+  mobile          String
+  
+  // Member position in registration (1 or 2)
+  memberNumber    Int      // 1 for Member 1, 2 for Member 2
+  
+  // Link to registration
+  registration    Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  registrationId  String
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([registrationId, memberNumber])
+  @@index([registrationId])
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFYING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
