@@ -74,8 +74,8 @@ export default function Hero() {
             <p className="text-center text-xl text-white/50 mt-8 max-w-2xl mx-auto">
                 Code, collaborate, and create with passionate developers. Unlock new skills, build real projects, and shape the future—together in our club.
             </p>
-            <form className="flex border border-white/15 rounded-full p-2 mt-8 max-w-lg mx-auto">
-                <input type="email" placeholder="Enter your email" className="bg-transparent px-4 md:flex-1 w-full"/>
+            <form className="flex border border-white/15 rounded-full p-2 mt-8 max-w-lg mx-auto gap-2">
+                <input type="email" placeholder="Enter your email" className="bg-transparent px-4 md:flex-1 w-full rounded-3xl outline-none focus-visible:border-2"/>
                 <Button variant="primary" type="submit" className="whitespace-nowrap" size="sm">Sign Up</Button>
             </form>
         </div>
