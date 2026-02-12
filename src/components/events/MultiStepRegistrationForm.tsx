@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { SessionSlot } from "@prisma/client";
 import PassSelectionStep from "./steps/PassSelectionStep";
 import MemberInfoStep from "./steps/MemberInfoStep";
 import PaymentStep from "./steps/PaymentStep";
+import SlotSelectionStep from "./steps/SlotSelectionStep";
 import ProgressTabs from "./ProgressTabs";
 
 interface Pass {
@@ -20,7 +22,7 @@ interface Props {
   eventId: string;
 }
 
-export type RegistrationStep = "pass" | "member1Info" | "member1Details" | "member2Info" | "member2Details" | "payment";
+export type RegistrationStep = "pass" | "member1Info" | "member1Details" | "member2Info" | "member2Details" | "slotSelection" | "payment";
 
 export interface MemberData {
   firstName: string;
@@ -36,6 +38,7 @@ export interface RegistrationData {
   passPrice: number;
   member1: MemberData;
   member2?: MemberData;
+  slot: SessionSlot | null;
   transactionId: string;
   screenshotFile?: File;
 }
@@ -46,6 +49,7 @@ export default function MultiStepRegistrationForm({
   eventId,
 }: Props) {
   const [selectedPass, setSelectedPass] = useState<Pass | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SessionSlot | null>(null);
   const [formData, setFormData] = useState<RegistrationData>({
     passType: "",
     passPrice: 0,
@@ -65,6 +69,7 @@ export default function MultiStepRegistrationForm({
       email: "",
       mobile: "",
     },
+    slot: null,
     transactionId: "",
     screenshotFile: undefined,
   });
@@ -78,14 +83,17 @@ export default function MultiStepRegistrationForm({
     if (!selectedPass) return ["pass"];
     
     if (selectedPass.type === "solo") {
-      return ["pass", "member1Info", "member1Details", "payment"];
+      // Solo pass: 5 steps
+      return ["pass", "member1Info", "member1Details", "slotSelection", "payment"];
     } else {
+      // Couple pass: 7 steps
       return [
         "pass",
         "member1Info",
         "member1Details",
         "member2Info",
         "member2Details",
+        "slotSelection",
         "payment",
       ];
     }
@@ -104,8 +112,8 @@ export default function MultiStepRegistrationForm({
     
     // Move to next step
     const nextSteps = pass.type === "solo"
-      ? ["pass", "member1Info", "member1Details", "payment"]
-      : ["pass", "member1Info", "member1Details", "member2Info", "member2Details", "payment"];
+      ? ["pass", "member1Info", "member1Details", "slotSelection", "payment"]
+      : ["pass", "member1Info", "member1Details", "member2Info", "member2Details", "slotSelection", "payment"];
     setCurrentStep(nextSteps[1] as RegistrationStep);
   };
 
@@ -130,8 +138,12 @@ export default function MultiStepRegistrationForm({
   const handleNext = () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < steps.length) {
-      setCurrentStep(steps[nextIndex]);
+      const nextStep = steps[nextIndex];
+      console.log(`Transitioning from ${currentStep} (index ${currentStepIndex}) to ${nextStep} (index ${nextIndex})`);
+      setCurrentStep(nextStep);
       setErrors({});
+    } else {
+      console.warn(`Cannot proceed: already at last step (${currentStepIndex + 1}/${steps.length})`);
     }
   };
 
@@ -145,6 +157,7 @@ export default function MultiStepRegistrationForm({
 
   const handleReset = () => {
     setSelectedPass(null);
+    setSelectedSlot(null);
     setCurrentStep("pass");
     setFormData({
       passType: "",
@@ -165,6 +178,7 @@ export default function MultiStepRegistrationForm({
         email: "",
         mobile: "",
       },
+      slot: null,
       transactionId: "",
       screenshotFile: undefined,
     });
@@ -221,68 +235,86 @@ export default function MultiStepRegistrationForm({
           />
         )}
 
-        {currentStep === "payment" && (
-          <PaymentStep
-            key="payment"
-            passType={selectedPass?.type || ""}
-            passPrice={selectedPass?.price || 0}
-            member1={formData.member1}
-            member2={formData.member2}
-            onTransactionIdChange={(id) =>
-              setFormData((prev) => ({ ...prev, transactionId: id }))
-            }
-            onFileChange={(file) =>
-              setFormData((prev) => ({ ...prev, screenshotFile: file }))
-            }
-            transactionId={formData.transactionId}
-            screenshotFile={formData.screenshotFile}
-            onSubmit={async () => {
-              setIsLoading(true);
-              try {
-                // Import multiStepRegister dynamically
-                const { multiStepRegister } = await import("@/app/events/actions");
-                
-                const result = await multiStepRegister({
-                  eventId,
-                  passType: formData.passType,
-                  firstName: formData.member1.firstName,
-                  middleName: formData.member1.middleName,
-                  lastName: formData.member1.lastName,
-                  regNo: formData.member1.regNo,
-                  email: formData.member1.email,
-                  mobile: formData.member1.mobile,
-                  member2: formData.member2 && formData.member2.firstName 
-                    ? {
-                        firstName: formData.member2.firstName,
-                        middleName: formData.member2.middleName,
-                        lastName: formData.member2.lastName,
-                        regNo: formData.member2.regNo,
-                        email: formData.member2.email,
-                        mobile: formData.member2.mobile,
-                      }
-                    : null,
-                  screenshotFile: formData.screenshotFile,
-                  transactionId: formData.transactionId,
-                });
-
-                if (!result.success) {
-                  setErrors({ submit: result.error || "Registration failed" });
-                }
-              } catch (err) {
-                console.error("Registration error:", err);
-                setErrors({ submit: "Failed to submit registration" });
-              } finally {
-                setIsLoading(false);
-              }
+        {currentStep === "slotSelection" && (
+          <SlotSelectionStep
+            key="slotSelection"
+            selectedSlot={selectedSlot}
+            onSelect={(slot) => {
+              setSelectedSlot(slot);
+              setFormData((prev) => ({ ...prev, slot }));
             }}
+            onNext={handleNext}
             onPrevious={handlePrevious}
-            onReset={handleReset}
-            isLoading={isLoading}
             errors={errors}
-            eventId={eventId}
           />
         )}
       </AnimatePresence>
+
+      {/* Payment Step - Rendered outside AnimatePresence to avoid animation conflicts with fixed modal */}
+      {currentStep === "payment" && selectedPass && (
+        <PaymentStep
+          key="payment"
+          passType={selectedPass.type}
+          passPrice={selectedPass.price}
+          member1={formData.member1}
+          member2={formData.member2}
+          selectedSlot={selectedSlot}
+          onTransactionIdChange={(id) =>
+            setFormData((prev) => ({ ...prev, transactionId: id }))
+          }
+          onFileChange={(file) =>
+            setFormData((prev) => ({ ...prev, screenshotFile: file }))
+          }
+          transactionId={formData.transactionId}
+          screenshotFile={formData.screenshotFile}
+          onSubmit={async () => {
+            setIsLoading(true);
+            try {
+              // Import multiStepRegister dynamically
+              const { multiStepRegister } = await import("@/app/events/actions");
+              
+              const result = await multiStepRegister({
+                eventId,
+                passType: formData.passType,
+                passPrice: formData.passPrice,
+                slot: formData.slot,
+                firstName: formData.member1.firstName,
+                middleName: formData.member1.middleName,
+                lastName: formData.member1.lastName,
+                regNo: formData.member1.regNo,
+                email: formData.member1.email,
+                mobile: formData.member1.mobile,
+                member2: formData.member2 && formData.member2.firstName 
+                  ? {
+                      firstName: formData.member2.firstName,
+                      middleName: formData.member2.middleName,
+                      lastName: formData.member2.lastName,
+                      regNo: formData.member2.regNo,
+                      email: formData.member2.email,
+                      mobile: formData.member2.mobile,
+                    }
+                  : null,
+                screenshotFile: formData.screenshotFile,
+                transactionId: formData.transactionId,
+              });
+
+              if (!result.success) {
+                setErrors({ submit: result.error || "Registration failed" });
+              }
+            } catch (err) {
+              console.error("Registration error:", err);
+              setErrors({ submit: "Failed to submit registration" });
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+          onPrevious={handlePrevious}
+          onReset={handleReset}
+          isLoading={isLoading}
+          errors={errors}
+          eventId={eventId}
+        />
+      )}
     </div>
   );
 }

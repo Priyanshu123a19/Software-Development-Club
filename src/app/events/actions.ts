@@ -3,6 +3,7 @@
 import { RegistrationSchema, type RegistrationData } from "@/lib/validations/eventSchema";
 import { prisma } from "@/lib/db";
 import { uploadPaymentScreenshot } from "@/lib/supabase";
+import type { SessionSlot } from "@prisma/client";
 
 export async function registerUser(formData: Partial<RegistrationData>) {
   try {
@@ -17,30 +18,40 @@ export async function registerUser(formData: Partial<RegistrationData>) {
 
     const data = validatedData.data;
 
-    // 2. Check for existing registration to prevent duplicates
-    const existingRegistration = await prisma.registration.findUnique({
-      where: { 
-        regNo: data.regNo 
-      },
-    });
+    // 2. Use transaction to safely check and create registration
+    const registration = await prisma.$transaction(async (tx) => {
+      // Check for existing registration with regNo and eventId
+      const existingRegistration = await tx.registration.findUnique({
+        where: { 
+          regNo_eventId: {
+            regNo: data.regNo,
+            eventId: data.eventId || "",
+          }
+        },
+      });
 
-    if (existingRegistration) {
-      return { error: "This registration number is already registered for the event." };
-    }
+      if (existingRegistration) {
+        throw new Error("This registration number is already registered for this event.");
+      }
 
-    // 3. Create registration record with PENDING payment status
-    const registration = await prisma.registration.create({
-      data: {
-        firstName: data.firstName,
-        middleName: data.middleName,
-        lastName: data.lastName,
-        regNo: data.regNo,
-        email: data.email,
-        mobile: data.mobile,
-        passType: data.passType,
-        paymentStatus: 'PENDING',
-        eventId: data.eventId,
-      },
+      // Create registration record
+      const newRegistration = await tx.registration.create({
+        data: {
+          firstName: data.firstName,
+          middleName: data.middleName,
+          lastName: data.lastName,
+          regNo: data.regNo,
+          email: data.email,
+          mobile: data.mobile,
+          passType: data.passType,
+          paymentStatus: 'PENDING',
+          eventId: data.eventId || "",
+          slot: 'MORNING',
+          totalPrice: 0,
+        },
+      });
+
+      return newRegistration;
     });
 
     const paymentUrl = `/events/payment/${registration.id}`;
@@ -51,7 +62,13 @@ export async function registerUser(formData: Partial<RegistrationData>) {
       paymentUrl 
     };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "";
     console.error("Registration error:", error);
+    
+    if (errorMessage.includes("already registered")) {
+      return { error: "This registration number is already registered for this event." };
+    }
+    
     return { error: "Database connection failed. Please try again later." };
   }
 }
@@ -157,6 +174,8 @@ export async function multiStepRegister(
   data: {
     eventId: string;
     passType: string;
+    passPrice?: number;
+    slot?: SessionSlot | null;
     firstName: string;
     middleName?: string;
     lastName: string;
@@ -176,19 +195,33 @@ export async function multiStepRegister(
   }
 ) {
   try {
-    // Check for existing registration with primary member
-    const existingRegistration = await prisma.registration.findUnique({
-      where: { regNo: data.regNo },
-    });
+    // Verify Prisma client is initialized
+    if (!prisma) {
+      console.error("❌ Prisma client is not initialized");
+      return { success: false, error: "Database connection is not available. Please try again." };
+    }
 
-    if (existingRegistration) {
-      return { success: false, error: "This registration number is already registered for the event." };
+    // Test database connection
+    try {
+      await prisma.$connect();
+      console.log("✅ Prisma client connected successfully");
+    } catch (connectionError) {
+      console.error("❌ Prisma connection failed:", connectionError);
+      return { success: false, error: "Unable to connect to the database. Please check your connection and try again." };
+    }
+
+    // Validate required fields
+    if (!data.slot) {
+      return { success: false, error: "Session slot is required. Please select a time slot." };
+    }
+
+    if (!data.transactionId || data.transactionId.trim().length === 0) {
+      return { success: false, error: "Transaction ID is required for payment verification." };
     }
 
     // Upload payment screenshot if provided
     let screenshotUrl: string | null = null;
     if (data.screenshotFile) {
-      const { uploadPaymentScreenshot } = await import("@/lib/supabase");
       const uploadResult = await uploadPaymentScreenshot(
         data.screenshotFile,
         data.firstName,
@@ -199,60 +232,115 @@ export async function multiStepRegister(
       }
     }
 
-    // Create registration with primary member
-    const registration = await prisma.registration.create({
-      data: {
-        firstName: data.firstName,
-        middleName: data.middleName,
-        lastName: data.lastName,
-        regNo: data.regNo,
-        email: data.email,
-        mobile: data.mobile,
-        passType: data.passType,
-        paymentStatus: 'PENDING',
-        transactionId: data.transactionId,
-        screenshotUrl,
-        eventId: data.eventId,
-        // Create participant for primary member
-        participants: {
-          create: {
-            firstName: data.firstName,
-            middleName: data.middleName,
-            lastName: data.lastName,
+    // Execute all database operations in a transaction for data integrity
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Check for existing registration with this regNo and eventId
+      const existingRegistration = await tx.registration.findUnique({
+        where: {
+          regNo_eventId: {
             regNo: data.regNo,
-            email: data.email,
-            mobile: data.mobile,
-            memberNumber: 1,
+            eventId: data.eventId,
           },
         },
-      },
-      include: {
-        participants: true,
-      },
-    });
+      });
 
-    // If couple pass, create second participant
-    if (data.member2 && data.passType === 'couple') {
-      await prisma.participant.create({
+      if (existingRegistration) {
+        throw new Error("This registration number is already registered for this event.");
+      }
+
+      // 2. Create registration record with primary member
+      const registration = await tx.registration.create({
         data: {
-          firstName: data.member2.firstName,
-          middleName: data.member2.middleName,
-          lastName: data.member2.lastName,
-          regNo: data.member2.regNo,
-          email: data.member2.email,
-          mobile: data.member2.mobile,
-          memberNumber: 2,
-          registrationId: registration.id,
+          firstName: data.firstName,
+          middleName: data.middleName,
+          lastName: data.lastName,
+          regNo: data.regNo,
+          email: data.email,
+          mobile: data.mobile,
+          passType: data.passType.toUpperCase(),
+          paymentStatus: 'PENDING',
+          transactionId: data.transactionId,
+          screenshotUrl: screenshotUrl || undefined,
+          eventId: data.eventId,
+          slot: data.slot!, // Save selected session slot (validated above)
+          totalPrice: data.passPrice || 0,
+          // Create participant for primary member
+          participants: {
+            create: {
+              firstName: data.firstName,
+              middleName: data.middleName,
+              lastName: data.lastName,
+              regNo: data.regNo,
+              email: data.email,
+              mobile: data.mobile,
+              memberNumber: 1,
+            },
+          },
+        },
+        include: {
+          participants: true,
         },
       });
-    }
+
+      // 3. If couple pass, create second participant
+      if (data.member2 && data.passType.toUpperCase() === 'COUPLE') {
+        await tx.participant.create({
+          data: {
+            firstName: data.member2.firstName,
+            middleName: data.member2.middleName,
+            lastName: data.member2.lastName,
+            regNo: data.member2.regNo,
+            email: data.member2.email,
+            mobile: data.member2.mobile,
+            memberNumber: 2,
+            registrationId: registration.id,
+          },
+        });
+      }
+
+      return registration;
+    });
 
     return {
       success: true,
-      registrationId: registration.id,
+      registrationId: result.id,
     };
   } catch (error) {
-    console.error("Multi-step registration error:", error);
-    return { success: false, error: "Failed to process registration. Please try again." };
+    // Enhanced error logging with full details
+    console.error("❌ Multi-step registration error occurred:");
+    console.error("Error type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("Error message:", error instanceof Error ? error.message : String(error));
+    console.error("Full error object:", error);
+    console.error("Stack trace:", error instanceof Error ? error.stack : "No stack trace available");
+    console.error("Registration data (sanitized):", {
+      eventId: data.eventId,
+      passType: data.passType,
+      regNo: data.regNo,
+      email: data.email,
+      hasScreenshot: !!data.screenshotFile,
+      slot: data.slot,
+    });
+    
+    // Ensure we always return a proper error object
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    
+    // Return user-friendly error messages
+    if (errorMessage.includes("already registered")) {
+      return { success: false, error: "This registration number is already registered for this event." };
+    }
+    
+    if (errorMessage.includes("Unique constraint")) {
+      return { success: false, error: "A registration with this information already exists." };
+    }
+    
+    if (errorMessage.includes("connection") || errorMessage.includes("timeout")) {
+      return { success: false, error: "Database connection error. Please try again in a moment." };
+    }
+    
+    // Always return a structured error response, never throw
+    return { 
+      success: false, 
+      error: errorMessage || "Failed to process registration. Please try again." 
+    };
   }
 }

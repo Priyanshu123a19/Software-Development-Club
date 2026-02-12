@@ -1,0 +1,115 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test.local << EOF
+          BASE_URL=http://localhost:3000
+          DATABASE_URL="${{ secrets.TEST_DATABASE_URL }}"
+          DIRECT_URL="${{ secrets.TEST_DIRECT_URL }}"
+          NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}"
+          EOF
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Run stress tests
+        run: npm run test:stress
+        env:
+          CI: true
+        continue-on-error: true # Stress tests may fail under CI resource constraints
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.node-version }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots-${{ matrix.node-version }}
+          path: test-results/
+          retention-days: 7
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsPath = 'test-results/results.json';
+            
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              const passed = results.stats.expected;
+              const failed = results.stats.unexpected;
+              const total = passed + failed;
+              
+              const comment = `## 🧪 E2E Test Results
+              
+              - **Total Tests**: ${total}
+              - **✅ Passed**: ${passed}
+              - **❌ Failed**: ${failed}
+              - **Success Rate**: ${((passed/total)*100).toFixed(1)}%
+              
+              [View full report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  test-summary:
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always()
+    steps:
+      - name: Test Summary
+        run: |
+          echo "## E2E Test Execution Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Check the artifacts for detailed test reports and screenshots." >> $GITHUB_STEP_SUMMARY

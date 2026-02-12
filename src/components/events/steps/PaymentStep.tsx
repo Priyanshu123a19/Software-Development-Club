@@ -5,12 +5,14 @@ import { motion } from "framer-motion";
 import { confirmPayment } from "@/app/events/actions";
 import Button from "@/components/Button";
 import type { MemberData } from "../MultiStepRegistrationForm";
+import type { SessionSlot } from "@prisma/client";
 
 interface Props {
   passType: string;
   passPrice: number;
   member1: MemberData;
   member2?: MemberData;
+  selectedSlot: SessionSlot | null;
   onTransactionIdChange: (id: string) => void;
   onFileChange: (file: File | undefined) => void;
   transactionId: string;
@@ -28,6 +30,7 @@ export default function PaymentStep({
   passPrice,
   member1,
   member2,
+  selectedSlot,
   onTransactionIdChange,
   onFileChange,
   transactionId,
@@ -180,6 +183,15 @@ export default function PaymentStep({
                     <p className="text-xs text-white/50 uppercase">Mobile</p>
                     <p className="text-white font-mono">+91 {primaryMember.mobile}</p>
                   </div>
+
+                  {selectedSlot && (
+                    <div>
+                      <p className="text-xs text-white/50 uppercase">Session</p>
+                      <p className="text-white font-medium">
+                        {selectedSlot === "MORNING" ? "Session 1 (10:00 AM - 1:00 PM)" : "Session 2 (1:30 PM - 4:30 PM)"}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {isCouplePass && member2 && (

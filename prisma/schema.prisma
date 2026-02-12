@@ -12,6 +12,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SessionSlot {
+  MORNING   // 10:00 AM - 1:00 PM
+  AFTERNOON // 1:30 PM - 4:30 PM
+}
+
 model Event {
   id           String         @id @default(cuid())
   title        String
@@ -43,32 +48,35 @@ model Pass {
 }
 
 model Registration {
-  id            String        @id @default(cuid())
+  id            String         @id @default(cuid())
   
   // Primary contact information (Member 1 for Couple passes)
   firstName     String
   middleName    String?
   lastName      String
-  regNo         String        @unique
+  regNo         String
   email         String
   mobile        String
   
   // Event Information
-  event         Event?        @relation(fields: [eventId], references: [id])
-  eventId       String?
-  passType      String
+  eventId       String
+  event         Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  passType      String         // "SOLO" or "COUPLE"
+  slot          SessionSlot    // Session slot for the registration
+  totalPrice    Float
   
   // Participants (for Couple passes, stores both members)
   participants  Participant[]
   
   // Payment Information
-  paymentStatus PaymentStatus @default(PENDING)
+  paymentStatus PaymentStatus  @default(PENDING)
   transactionId String?
   screenshotUrl String?
   
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   
+  @@unique([regNo, eventId])
   @@index([regNo])
   @@index([eventId])
   @@index([paymentStatus])

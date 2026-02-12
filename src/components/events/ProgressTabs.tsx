@@ -20,6 +20,7 @@ const STEP_LABELS: Record<RegistrationStep, string> = {
   member1Details: "Member 1 Details",
   member2Info: "Member 2 Info",
   member2Details: "Member 2 Details",
+  slotSelection: "Slot Selection",
   payment: "Payment",
 };
 
