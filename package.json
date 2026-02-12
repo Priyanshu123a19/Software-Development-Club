@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "test": "playwright test",
     "test:e2e": "playwright test registration.spec.ts",
     "test:stress": "playwright test stress.spec.ts",
