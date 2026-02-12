@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "test": "playwright test",
     "test:e2e": "playwright test registration.spec.ts",
     "test:stress": "playwright test stress.spec.ts",
