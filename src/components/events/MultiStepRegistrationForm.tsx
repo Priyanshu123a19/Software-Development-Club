@@ -139,11 +139,8 @@ export default function MultiStepRegistrationForm({
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < steps.length) {
       const nextStep = steps[nextIndex];
-      console.log(`Transitioning from ${currentStep} (index ${currentStepIndex}) to ${nextStep} (index ${nextIndex})`);
       setCurrentStep(nextStep);
       setErrors({});
-    } else {
-      console.warn(`Cannot proceed: already at last step (${currentStepIndex + 1}/${steps.length})`);
     }
   };
 

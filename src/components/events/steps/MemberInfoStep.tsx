@@ -147,6 +147,7 @@ export default function MemberInfoStep({
                 </label>
                 <input
                   type="text"
+                  name="firstName"
                   value={data.firstName}
                   onChange={handleInputChange("firstName")}
                   placeholder="John"
@@ -167,6 +168,7 @@ export default function MemberInfoStep({
                 </label>
                 <input
                   type="text"
+                  name="lastName"
                   value={data.lastName}
                   onChange={handleInputChange("lastName")}
                   placeholder="Doe"
@@ -189,6 +191,7 @@ export default function MemberInfoStep({
               </label>
               <input
                 type="text"
+                name="middleName"
                 value={data.middleName}
                 onChange={handleInputChange("middleName")}
                 placeholder="Optional"
@@ -212,6 +215,7 @@ export default function MemberInfoStep({
               </label>
               <input
                 type="text"
+                name="regNo"
                 value={data.regNo}
                 onChange={handleInputChange("regNo")}
                 placeholder="25BCE10001"
@@ -234,6 +238,7 @@ export default function MemberInfoStep({
               </label>
               <input
                 type="email"
+                name="email"
                 value={data.email}
                 onChange={handleInputChange("email")}
                 placeholder="john.25bce10001@vitbhopal.ac.in"
@@ -255,6 +260,7 @@ export default function MemberInfoStep({
               </label>
               <input
                 type="tel"
+                name="mobile"
                 value={data.mobile}
                 onChange={handleInputChange("mobile")}
                 placeholder="9876543210"

@@ -6,13 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test": "playwright test",
-    "test:e2e": "playwright test registration.spec.ts",
-    "test:stress": "playwright test stress.spec.ts",
-    "test:ui": "playwright test --ui",
-    "test:debug": "playwright test --debug",
-    "test:report": "playwright show-report"
+    "lint": "next lint"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
@@ -28,17 +22,15 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@types/node": "^20.19.33",
     "@types/pg": "^8.16.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.20",
-    "dotenv": "^17.2.4",
     "eslint": "^8",
     "eslint-config-next": "15.0.2",
     "postcss": "^8",
-    "prisma": "^6.19.2",
+    "prisma": "^7.4.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

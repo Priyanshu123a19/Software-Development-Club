@@ -304,6 +304,7 @@ export default function PaymentStep({
               </label>
               <input
                 type="text"
+                name="transactionId"
                 value={transactionId}
                 onChange={(e) => onTransactionIdChange(e.target.value)}
                 placeholder="Enter UTR / Reference ID"
@@ -329,6 +330,7 @@ export default function PaymentStep({
                 <div className="border-2 border-solid border-[#E45A92]/30 hover:border-[#E45A92] rounded-2xl p-6 hover:bg-[#E45A92]/5 transition-all text-center duration-300">
                   <input
                     type="file"
+                    name="screenshot"
                     accept="image/jpeg,image/png,application/pdf"
                     onChange={handleFileChange}
                     className="hidden"
