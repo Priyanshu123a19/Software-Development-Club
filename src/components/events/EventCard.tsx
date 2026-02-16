@@ -47,12 +47,13 @@ export default function EventCard({
       className="group relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-900/90 backdrop-blur-xl"
     >
       {/* Event Image */}
-      {image ? (
+      {displayImage ? (
         <div className="relative h-48 overflow-hidden">
-          <Image 
-            src={displayImage} 
-            alt={title} 
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          <Image
+            src={displayImage}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/90 to-transparent" />
         </div>
