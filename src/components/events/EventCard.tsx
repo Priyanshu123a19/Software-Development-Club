@@ -2,6 +2,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Button from "@/components/Button";
+import Image from "next/image";
+import homecomingImage from "@/assets/images/Events/homecoming-sdc-26.png";
 
 export interface EventCardProps {
   id: string;
@@ -34,6 +36,7 @@ export default function EventCard({
   });
   const spotsLeft = capacity - registeredCount;
   const isAlmostFull = spotsLeft <= capacity * 0.2;
+  const displayImage = image || homecomingImage.src;
 
   return (
     <motion.div
@@ -46,8 +49,8 @@ export default function EventCard({
       {/* Event Image */}
       {image ? (
         <div className="relative h-48 overflow-hidden">
-          <img 
-            src={image} 
+          <Image 
+            src={displayImage} 
             alt={title} 
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
