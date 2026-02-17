@@ -170,13 +170,14 @@ export default function PaymentPage({ params }: PageProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-neutral-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-5xl bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border border-white/10 rounded-3xl backdrop-blur-xl shadow-2xl my-8"
-      >
+    <div className="fixed inset-0 bg-neutral-950/90 backdrop-blur-md overflow-y-auto z-50">
+      <div className="min-h-full flex items-center justify-center p-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="w-full max-w-5xl bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border border-white/10 rounded-3xl backdrop-blur-xl shadow-2xl relative"
+        >
         {/* Header */}
         <div className="border-b border-white/10 px-6 md:px-8 py-4">
           <h1 className="text-2xl md:text-3xl font-bold font-sans antialiased text-white text-center tracking-wider bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
@@ -370,7 +371,8 @@ export default function PaymentPage({ params }: PageProps) {
             </div>
           </div>
         </form>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
