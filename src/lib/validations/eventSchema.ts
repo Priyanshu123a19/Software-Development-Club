@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-export const BRANCH_CODES = ['MEI', 'MIM', 'MIP', 'MSI', 'BAC', 'BAI', 'BAS', 'BBA', 'BCE', 'BCG', 'BCY', 'BEC', 'BET', 'BEY', 'BHI', 'BME', 'BMR', 'BOE', 'BSA'] as const;
+export const BRANCH_CODES = ['MEI', 'MIM', 'MIP', 'MSI', 'BAC', 'BAI', 'BAS', 'BBA', 'BCE', 'BCG', 'BCY', 'BEC', 'BET', 'BEY', 'BHI', 'BME', 'BMR', 'BOE', 'BSA', 'BCC', 'BCH', 'BAR', 'MCS', 'MVT', 'MDS', 'MAL', 'MBM', 'MCA', 'PHD'] as const;
 
 // VIT Bhopal Registration Number Pattern
 // Format: [21-25][Branch Code][5 digits]
-const VIT_REGNO_PATTERN = /^(21|22|23|24|25)(MEI|MIM|MIP|MSI|BAC|BAI|BAS|BBA|BCE|BCG|BCY|BEC|BET|BEY|BHI|BME|BMR|BOE|BSA)\d{5}$/;
+const VIT_REGNO_PATTERN = /^(21|22|23|24|25)(MEI|MIM|MIP|MIB|MSI|BAC|BAI|BAS|BBA|BCE|BCG|BCY|BEC|BET|BEY|BHI|BME|BMR|BOE|BSA|BCC|BCH|BAR|MCS|MVT|MDS|MAL|MBM|MCA|PHD)\d{5}$/;
 
 export const RegistrationSchema = z.object({
   firstName: z
