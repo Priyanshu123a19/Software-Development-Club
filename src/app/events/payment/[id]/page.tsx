@@ -72,6 +72,14 @@ export default function PaymentPage({ params }: PageProps) {
     }
   };
 
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -170,13 +178,14 @@ export default function PaymentPage({ params }: PageProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-neutral-950/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="w-full max-w-5xl bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border border-white/10 rounded-3xl backdrop-blur-xl shadow-2xl my-8"
-      >
+    <div className="fixed inset-0 bg-neutral-950/90 backdrop-blur-md overflow-y-auto z-50">
+      <div className="min-h-full flex items-center justify-center p-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="w-full max-w-5xl bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border border-white/10 rounded-3xl backdrop-blur-xl shadow-2xl relative"
+        >
         {/* Header */}
         <div className="border-b border-white/10 px-6 md:px-8 py-4">
           <h1 className="text-2xl md:text-3xl font-bold font-sans antialiased text-white text-center tracking-wider bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent">
@@ -192,8 +201,8 @@ export default function PaymentPage({ params }: PageProps) {
 
               {/* Total Cost */}
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="relative overflow-hidden rounded-3xl border-2 border-[#E45A92] bg-[#E45A92]/5 p-6 md:p-8 backdrop-blur-xl"
               >
@@ -229,8 +238,8 @@ export default function PaymentPage({ params }: PageProps) {
 
               {/* Bank Transfer Details */}
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/50 to-neutral-950/50 p-6 md:p-8 backdrop-blur-xl"
               >
@@ -240,24 +249,58 @@ export default function PaymentPage({ params }: PageProps) {
                 }} />
                 <div className="relative space-y-4">
                   <p className="text-xs uppercase tracking-widest text-white/50 font-semibold">Bank Transfer Details</p>
-                  <div className="space-y-3 text-sm">
+                  <div className="space-y-4 text-sm">
                     <div>
                       <p className="text-white/50 text-xs mb-1">Bank Name</p>
-                      <p className="text-white font-medium">Indian Bank, VIT Bhopal University, Kothri Kalan</p>
+                      <p className="text-white/90 font-medium">Indian Bank, VIT Bhopal University, Kothri Kalan</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="relative group">
                         <p className="text-white/50 text-xs mb-1">Account Number</p>
-                        <p className="text-white font-mono">656552XXXX</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-white/90 font-mono text-lg">656552XXXX</p>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard("656552XXXX", "acc")}
+                            className="text-white/40 hover:text-[#E45A92] transition-colors p-1"
+                            title="Copy Account Number"
+                          >
+                            {copiedField === "acc" ? (
+                              <span className="text-green-400 text-xs font-bold">COPIED</span>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       </div>
                       <div>
                         <p className="text-white/50 text-xs mb-1">IFSC Code</p>
-                        <p className="text-white font-mono">IDIB000V143</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-white/90 font-mono text-lg">IDIB000V143</p>
+                          <button
+                             type="button"
+                             onClick={() => copyToClipboard("IDIB000V143", "ifsc")}
+                             className="text-white/40 hover:text-[#E45A92] transition-colors p-1"
+                             title="Copy IFSC Code"
+                          >
+                            {copiedField === "ifsc" ? (
+                              <span className="text-green-400 text-xs font-bold">COPIED</span>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div>
                       <p className="text-white/50 text-xs mb-1">Account Name</p>
-                      <p className="text-white font-medium">Software Developement Club</p>
+                      <p className="text-white/90 font-medium">Software Developement Club</p>
                     </div>
                   </div>
                 </div>
@@ -267,8 +310,8 @@ export default function PaymentPage({ params }: PageProps) {
             {/* Right Column - Action */}
             <div className="space-y-6">
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/50 to-neutral-950/50 p-6 md:p-8 backdrop-blur-xl space-y-2"
               >
@@ -370,7 +413,8 @@ export default function PaymentPage({ params }: PageProps) {
             </div>
           </div>
         </form>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

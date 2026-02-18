@@ -66,7 +66,16 @@ export default function PaymentStep({
 
       onFileChange(file);
       setError("");
+      setError("");
     }
+  };
+
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const handleSubmit = async () => {
@@ -130,23 +139,23 @@ export default function PaymentStep({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-black/40 overflow-y-auto lg:overflow-hidden p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ duration: 0.3 }}
-        className="w-full mx-4 max-w-6xl h-[90vh] rounded-3xl border border-white/20 bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 p-8 backdrop-blur-2xl shadow-2xl flex flex-col"
+        className="w-full max-w-6xl min-h-[50vh] lg:h-[90vh] h-auto my-8 lg:my-0 rounded-3xl border border-white/20 bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 p-6 md:p-8 backdrop-blur-2xl shadow-2xl flex flex-col relative"
       >
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:flex-1 lg:overflow-hidden">
           {/* LEFT COLUMN: User Details & Cost */}
-          <div className="flex flex-col gap-6 overflow-y-auto pr-4">
+          <div className="flex flex-col gap-6 lg:overflow-y-auto pr-0 lg:pr-4">
             {/* User Details */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/50 to-neutral-950/50 p-6 backdrop-blur-xl"
             >
@@ -216,8 +225,8 @@ export default function PaymentStep({
 
             {/* Cost Details */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/50 to-neutral-950/50 p-6 backdrop-blur-xl"
             >
@@ -259,11 +268,11 @@ export default function PaymentStep({
           </div>
 
           {/* RIGHT COLUMN: Bank Details & Payment Form */}
-          <div className="flex flex-col gap-6 overflow-y-auto pl-4">
+          <div className="flex flex-col gap-6 lg:overflow-y-auto pl-0 lg:pl-4">
             {/* Bank Details */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
               className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/50 to-neutral-950/50 p-6 backdrop-blur-xl"
             >
@@ -271,22 +280,58 @@ export default function PaymentStep({
                 <h4 className="text-sm font-bold text-white uppercase tracking-widest">
                   Bank Transfer Details
                 </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="space-y-4 text-sm">
                   <div>
                     <p className="text-white/50 text-xs mb-1">Bank Name</p>
-                    <p className="text-white font-medium text-sm">Indian Bank</p>
+                    <p className="text-white/90 font-medium text-sm">Indian Bank</p>
                   </div>
-                  <div>
-                    <p className="text-white/50 text-xs mb-1">Account Number</p>
-                    <p className="text-white font-mono text-sm">6661092952</p>
-                  </div>
-                  <div>
-                    <p className="text-white/50 text-xs mb-1">IFSC Code</p>
-                    <p className="text-white font-mono text-sm">IDIB000V143</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-white/50 text-xs mb-1">Account Number</p>
+                      <div className="flex items-center gap-2">
+                         <p className="text-white/90 font-mono text-sm">6661092952</p>
+                         <button
+                            type="button"
+                            onClick={() => copyToClipboard("6661092952", "acc")}
+                            className="text-white/40 hover:text-[#E45A92] transition-colors p-1"
+                            title="Copy Account Number"
+                          >
+                            {copiedField === "acc" ? (
+                              <span className="text-green-400 text-xs font-bold">COPIED</span>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            )}
+                          </button>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-white/50 text-xs mb-1">IFSC Code</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-white/90 font-mono text-sm">IDIB000V143</p>
+                        <button
+                            type="button"
+                            onClick={() => copyToClipboard("IDIB000V143", "ifsc")}
+                            className="text-white/40 hover:text-[#E45A92] transition-colors p-1"
+                            title="Copy IFSC Code"
+                          >
+                            {copiedField === "ifsc" ? (
+                              <span className="text-green-400 text-xs font-bold">COPIED</span>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg>
+                            )}
+                          </button>
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <p className="text-white/50 text-xs mb-1">Account Name</p>
-                    <p className="text-white text-sm">SOFTWARE DEVELOPMENT CLUB</p>
+                    <p className="text-white/90 text-sm">SOFTWARE DEVELOPMENT CLUB</p>
                   </div>
                 </div>
               </div>
@@ -294,8 +339,8 @@ export default function PaymentStep({
 
             {/* Transaction ID */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className="space-y-2"
             >
@@ -318,8 +363,8 @@ export default function PaymentStep({
 
             {/* Screenshot Upload */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className="space-y-2"
             >
