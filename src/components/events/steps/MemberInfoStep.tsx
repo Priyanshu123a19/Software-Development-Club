@@ -77,7 +77,7 @@ export default function MemberInfoStep({
     } else {
       // Validate VIT credentials
       const VIT_REGNO_PATTERN =
-        /^(21|22|23|24|25)(MEI|MIM|MIP|MSI|BAC|BAI|BAS|BBA|BCE|BCG|BCY|BEC|BET|BEY|BHI|BME|BMR|BOE|BSA)\d{5}$/;
+        /^(21|22|23|24|25)(MEI|MIM|MIP|MIB|MSI|BAC|BAI|BAS|BBA|BCA|BCE|BCG|BCY|BCC|BCH|BEC|BET|BEY|BHI|BME|BMR|BOE|BSA|BAR|MCS|MVT|MDS|MAL|MBM|MCA|PHD)\d{5}$/;
 
       if (!data.regNo) {
         newErrors.regNo = "Registration number is required";
