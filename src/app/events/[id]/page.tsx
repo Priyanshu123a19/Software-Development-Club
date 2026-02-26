@@ -110,10 +110,21 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                   </div>
                   <div>
                     <p className="text-xs text-white/50 uppercase">Starting at</p>
-                    <p className="text-white font-medium">₹{event.price}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-white/40 line-through">₹150</span>
+                      <p className="text-white font-medium text-lg">₹{event.price}</p>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Discount Note */}
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 backdrop-blur">
+              <p className="text-sm text-red-300/90">
+                <strong className="text-red-200">LIMITED TIME OFFER!!!</strong><br></br> 
+                Discounted prices are available for a limited time only. Hurry up and grab the passes now.
+              </p>
             </div>
 
             {/* Note */}

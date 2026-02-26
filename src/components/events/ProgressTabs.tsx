@@ -49,9 +49,13 @@ export default function ProgressTabs({
       <div className="flex justify-between items-center text-xs text-white/60">
         <span>Step {currentIndex + 1} of {steps.length}</span>
         {selectedPass && (
-          <span className="text-[#E45A92] font-medium">
-            {selectedPass.type.toUpperCase()} - ₹{selectedPass.price}
-          </span>
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider">
+            <span className="text-[#E45A92]">{selectedPass.type} -</span>
+            <span className="text-white/40 line-through">
+              ₹{selectedPass.type === "couple" ? 250 : 150}
+            </span>
+            <span className="text-[#E45A92]">₹{selectedPass.price}</span>
+          </div>
         )}
       </div>
     </div>

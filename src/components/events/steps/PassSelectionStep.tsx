@@ -92,9 +92,12 @@ export default function PassSelectionStep({
 
               {/* Price */}
               <div className="pt-2 border-t border-white/10">
-                <p className="text-3xl font-bold text-white">
-                  ₹{pass.price}
-                </p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="text-lg text-white/40 line-through">
+                    ₹{pass.type === "couple" ? 250 : 150}
+                  </span>
+                  <span className="text-4xl font-bold text-white">₹{pass.price}</span>
+                </div>
                 <p className="text-xs text-white/50 mt-1">One-time payment</p>
               </div>
 

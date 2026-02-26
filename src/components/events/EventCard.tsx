@@ -106,9 +106,12 @@ export default function EventCard({
 
         {/* Price & CTA */}
         <div className="flex items-center justify-between pt-4 border-t border-white/10">
-          <div>
+          <div className="flex flex-col">
             <p className="text-xs text-white/50 uppercase tracking-widest">Starting at</p>
-            <p className="text-2xl font-bold text-white">₹{price}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-white/30 line-through">₹150</span>
+              <p className="text-2xl font-bold text-white">₹{price}</p>
+            </div>
           </div>
           <Link href={`/events/${id}`}>
             <Button variant="primary">
